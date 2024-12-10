@@ -1,0 +1,35 @@
+---
+services:
+  jenkins:
+    image: eazytraining/jenkins
+    ports:
+      - '8080'   # Expose uniquement le port 8080 localement
+      - '50000:50000' # Port pour les agents Jenkins (JNLP)
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.auget-labs.space`)"
+      - "traefik.http.routers.jenkins.entrypoints=websecure"  # Utilisation de HTTPS
+      - "traefik.http.routers.jenkins.tls.certresolver=letsencryptresolver"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080" # Port interne de Jenkins
+      - "traefik.http.middlewares.jenkins-headers.headers.customrequestheaders.X-Forwarded-Host=jenkins.auget-labs.space" # Pour indiquer quel domaine utiliser
+      - "traefik.http.middlewares.jenkins-headers.headers.customrequestheaders.X-Forwarded-Proto=https" # Pour indiquer quel protocole utiliser
+      - "traefik.http.routers.jenkins.middlewares=jenkins-headers" # Pour injecter ces en-tetes dans chaque requete.
+    privileged: true
+    restart: always
+    volumes:
+      #- './jenkins_data:/bitnami'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - './jenkins_home:/var/jenkins_home'
+      - './jenkins_data:/var/jenkins_data'
+    networks:
+      - traefik-net
+
+volumes:
+  jenkins_data:
+    driver: local
+  jenkins_home:
+    driver: local
+
+networks:
+  traefik-net:
+    external: true

@@ -1,0 +1,29 @@
+services:
+  jenkins:
+    image: eazytraining/jenkins
+    ports:
+      - '8081:8080'
+      - '50000:50000'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.jenkins.rule=Host(`jenkins.auget-labs.space`)"
+      - "traefik.http.routers.jenkins.entrypoints=web"
+      - "traefik.http.services.jenkins.loadbalancer.server.port=8080"
+    privileged: true
+    restart: always
+    volumes:
+      - 'jenkins_data:/bitnami'
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - 'jenkins_home:/var/jenkins_home'
+    networks:
+    - traefik_traefik-net
+
+volumes:
+  jenkins_data:
+    driver: local
+  jenkins_home:
+    driver: local
+
+networks:
+  traefik_traefik-net:
+    external: true
