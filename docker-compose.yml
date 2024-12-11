@@ -2,7 +2,7 @@
 services:
   jenkins:
     container_name: jenkins
-    image: jenkins/jenkins:slim
+    image: jenkins/jenkins:lts
     privileged: true
     restart: always
     user: root
@@ -20,6 +20,7 @@ services:
       - "traefik.http.routers.jenkins.middlewares=jenkins-headers" # Pour injecter ces en-tetes dans chaque requete.
     volumes:
       - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/usr/bin/docker:/usr/bin/docker'
       - './jenkins_home:/var/jenkins_home'
     networks:
       - traefik-net
